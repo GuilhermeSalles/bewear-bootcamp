@@ -7,7 +7,6 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import { on } from "events";
 
 export const userTable = pgTable("user", {
   id: text("id").primaryKey(),
