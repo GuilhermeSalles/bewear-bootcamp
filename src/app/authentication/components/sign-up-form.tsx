@@ -1,7 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +24,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 // Define the schema for the form validation using Zod
 // This schema will ensure that the email is valid and the password has a minimum length
@@ -29,10 +32,10 @@ const formSchema = z
   .object({
     name: z.string().trim().min(1, "Nome é obrigatório"),
     email: z.string().email("Email inválido").nonempty("Email é obrigatório"),
-    password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+    password: z.string().min(8, "Senha deve ter pelo menos 8 caracteres"),
     passwordConfirmation: z
       .string()
-      .min(6, "Confirmação de senha é obrigatória"),
+      .min(8, "Confirmação de senha é obrigatória"),
   })
   .refine(
     (data) => {
@@ -47,6 +50,7 @@ const formSchema = z
 type FormValues = z.infer<typeof formSchema>;
 
 const SignUpForm = () => {
+  const router = useRouter();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -57,9 +61,30 @@ const SignUpForm = () => {
     },
   });
 
-  function onSubmit(values: FormValues) {
-    console.log("Formulário enviado com sucesso!");
-    console.log(values);
+  async function onSubmit(values: FormValues) {
+    await authClient.signUp.email({
+      name: values.name,
+      email: values.email,
+      password: values.password,
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/");
+        },
+        onError: (error) => {
+          if (error.error.code === "USER_ALREADY_EXISTS") {
+            toast.error("Usuário já existe");
+            form.setError("email", {
+              type: "manual",
+              message: "Email já cadastrado.",
+            });
+          }
+
+          toast.error(
+            "Erro ao criar conta. Tente novamente. " + error.error.message,
+          );
+        },
+      },
+    });
   }
 
   return (
