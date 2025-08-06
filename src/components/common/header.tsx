@@ -42,7 +42,8 @@ export const Header = () => {
                     <div className="flex items-center gap-3">
                       <Avatar>
                         <AvatarImage
-                          src={session?.user?.image as string | undefined}
+                          src={session?.user?.image || "/default-avatar.png"}
+                          alt="User Avatar"
                         />
                         <AvatarFallback>
                           {session?.user?.name?.split(" ")?.[0]?.[0]}
