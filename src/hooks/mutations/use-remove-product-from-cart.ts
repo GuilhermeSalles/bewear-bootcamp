@@ -5,11 +5,10 @@ import { removeProductFromCart } from "@/actions/remove-cart-product";
 import { getUseCartQueryKey } from "../queries/use-cart";
 
 export const getRemoveProductFromCartMutationKey = (cartItemId: string) =>
-  [cartItemId, "remove-cart-product"] as const;
+  ["remove-cart-product", cartItemId] as const;
 
 export const useRemoveProductFromCart = (cartItemId: string) => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationKey: getRemoveProductFromCartMutationKey(cartItemId),
     mutationFn: () => removeProductFromCart({ cartItemId }),
