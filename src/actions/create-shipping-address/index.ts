@@ -1,27 +1,38 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
 import { db } from "@/db";
 import { shippingAddressTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
-import { CreateAddressInput, createAddressSchema } from "./schema";
+import {
+  CreateShippingAddressSchema,
+  createShippingAddressSchema,
+} from "./schema";
 
-export async function createAddress(input: CreateAddressInput) {
-  const data = createAddressSchema.parse(input);
-  const session = await auth.api.getSession({ headers: await headers() });
+export const createShippingAddress = async (
+  data: CreateShippingAddressSchema,
+) => {
+  createShippingAddressSchema.parse(data);
+
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
   if (!session?.user) {
     throw new Error("Unauthorized");
   }
-  const address = await db
+
+  const [shippingAddress] = await db
     .insert(shippingAddressTable)
     .values({
       userId: session.user.id,
       recipientName: data.fullName,
       street: data.address,
       number: data.number,
-      complement: data.complement,
+      complement: data.complement || null,
       city: data.city,
       state: data.state,
       neighborhood: data.neighborhood,
@@ -32,5 +43,8 @@ export async function createAddress(input: CreateAddressInput) {
       cpfOrCnpj: data.cpf,
     })
     .returning();
-  return address[0];
-}
+
+  revalidatePath("/cart/identification");
+
+  return shippingAddress;
+};
