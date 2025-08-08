@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -22,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useCreateAddressWithUser } from "@/hooks/mutations/use-create-address-with-user";
+import { useAddresses } from "@/hooks/queries/use-addresses";
 
 const formSchema = z.object({
   email: z.email("E-mail inválido"),
@@ -41,6 +43,15 @@ type FormValues = z.infer<typeof formSchema>;
 
 const Addresses = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+
+  function handleSelectAddress(value: string) {
+    setSelectedAddress(value);
+    if (value !== "add_new") {
+      form.reset();
+    }
+  }
+  const { data: addresses, isLoading: isLoadingAddresses } = useAddresses();
+  const queryClient = useQueryClient();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -68,6 +79,7 @@ const Addresses = () => {
         form.reset();
         toast.success("Endereço salvo com sucesso");
         setSelectedAddress(null);
+        queryClient.invalidateQueries({ queryKey: ["addresses"] });
         router.refresh();
       },
       onError: (error: unknown) => {
@@ -89,7 +101,28 @@ const Addresses = () => {
         <CardTitle>Identificação</CardTitle>
       </CardHeader>
       <CardContent>
-        <RadioGroup value={selectedAddress} onValueChange={setSelectedAddress}>
+        <RadioGroup value={selectedAddress} onValueChange={handleSelectAddress}>
+          {addresses &&
+            addresses.length > 0 &&
+            addresses.map((address) => (
+              <Card
+                key={address.id}
+                className={
+                  selectedAddress === address.id
+                    ? "border-primary ring-primary ring-2"
+                    : ""
+                }
+              >
+                <CardContent className="flex items-center space-x-2 py-4">
+                  <RadioGroupItem value={address.id} id={address.id} />
+                  <Label htmlFor={address.id} className="flex-1 cursor-pointer">
+                    {address.recipientName}, {address.street}, {address.number}
+                    {address.complement ? `, ${address.complement}` : ""},{" "}
+                    {address.neighborhood}, {address.city} - {address.state}
+                  </Label>
+                </CardContent>
+              </Card>
+            ))}
           <Card>
             <CardContent>
               <div className="flex items-center space-x-2">
@@ -107,6 +140,7 @@ const Addresses = () => {
               className="mt-4 space-y-4"
             >
               <div className="grid gap-4 md:grid-cols-2">
+                {/* ...campos do formulário, igual antes... */}
                 <FormField
                   control={form.control}
                   name="email"
@@ -120,7 +154,6 @@ const Addresses = () => {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="fullName"
@@ -137,7 +170,6 @@ const Addresses = () => {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="cpf"
@@ -156,7 +188,6 @@ const Addresses = () => {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="phone"
@@ -175,7 +206,6 @@ const Addresses = () => {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="zipCode"
@@ -194,7 +224,6 @@ const Addresses = () => {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="address"
@@ -208,7 +237,6 @@ const Addresses = () => {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="number"
@@ -222,7 +250,6 @@ const Addresses = () => {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="complement"
@@ -239,7 +266,6 @@ const Addresses = () => {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="neighborhood"
@@ -253,7 +279,6 @@ const Addresses = () => {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="city"
@@ -267,7 +292,6 @@ const Addresses = () => {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="state"
@@ -282,7 +306,6 @@ const Addresses = () => {
                   )}
                 />
               </div>
-
               <Button
                 type="submit"
                 className="w-full"
