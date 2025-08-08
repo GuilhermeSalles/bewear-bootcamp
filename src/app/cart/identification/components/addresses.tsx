@@ -22,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { shippingAddressTable } from "@/db/schema";
 import { useCreateAddressWithUser } from "@/hooks/mutations/use-create-address-with-user";
 import { useAddresses } from "@/hooks/queries/use-addresses";
 
@@ -41,7 +42,9 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const Addresses = () => {
+type Address = typeof shippingAddressTable.$inferSelect;
+
+const Addresses = ({ shippingAddress }: { shippingAddress: Address[] }) => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
 
   function handleSelectAddress(value: string) {
@@ -50,7 +53,9 @@ const Addresses = () => {
       form.reset();
     }
   }
-  const { data: addresses, isLoading: isLoadingAddresses } = useAddresses();
+  const { data: addresses } = useAddresses({
+    initialData: shippingAddress,
+  });
   const queryClient = useQueryClient();
 
   const form = useForm<FormValues>({
