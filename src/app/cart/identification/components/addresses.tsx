@@ -1,9 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { PatternFormat } from "react-number-format";
+import { toast } from "sonner";
 import z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useCreateAddressWithUser } from "@/hooks/mutations/use-create-address-with-user";
 
 const formSchema = z.object({
   email: z.email("E-mail inválido"),
@@ -56,8 +59,28 @@ const Addresses = () => {
     },
   });
 
+  const mutation = useCreateAddressWithUser();
+  const router = useRouter();
+
   const onSubmit = (values: FormValues) => {
-    console.log(values);
+    mutation.mutate(values, {
+      onSuccess: () => {
+        form.reset();
+        toast.success("Endereço salvo com sucesso");
+        setSelectedAddress(null);
+        router.refresh();
+      },
+      onError: (error: unknown) => {
+        if (error && typeof error === "object" && "message" in error) {
+          toast.error(
+            (error as { message?: string }).message ||
+              "Erro ao salvar endereço",
+          );
+        } else {
+          toast.error("Erro ao salvar endereço");
+        }
+      },
+    });
   };
 
   return (
@@ -77,7 +100,7 @@ const Addresses = () => {
           </Card>
         </RadioGroup>
 
-        {selectedAddress === "add_new" && (
+        {selectedAddress === "add_new" && mutation.isIdle && (
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -260,8 +283,12 @@ const Addresses = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full">
-                Salvar endereço
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={mutation.isPending}
+              >
+                {mutation.isPending ? "Salvando..." : "Salvar endereço"}
               </Button>
             </form>
           </Form>
