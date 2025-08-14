@@ -1,3 +1,4 @@
+// src/app/category/[slug]/page.tsx
 import { notFound } from "next/navigation";
 
 import Footer from "@/components/common/footer";
@@ -6,11 +7,11 @@ import ProductItem from "@/components/common/product-item";
 import { db } from "@/db";
 
 interface CategoryPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 const CategoryPage = async ({ params }: CategoryPageProps) => {
-  const { slug } = params;
+  const { slug } = await params;
 
   const category = await db.query.categoryTable.findFirst({
     where: (categoryTable, { eq }) => eq(categoryTable.slug, slug),
