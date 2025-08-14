@@ -26,8 +26,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 
-// Define the schema for the form validation using Zod
-// This schema will ensure that the email is valid and the password has a minimum length
 const formSchema = z
   .object({
     name: z.string().trim().min(1, "Nome é obrigatório"),
@@ -37,15 +35,10 @@ const formSchema = z
       .string()
       .min(8, "Confirmação de senha é obrigatória"),
   })
-  .refine(
-    (data) => {
-      return data.password === data.passwordConfirmation;
-    },
-    {
-      error: "As senhas não coincidem",
-      path: ["passwordConfirmation"],
-    },
-  );
+  .refine((data) => data.password === data.passwordConfirmation, {
+    error: "As senhas não coincidem",
+    path: ["passwordConfirmation"],
+  });
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -67,9 +60,7 @@ const SignUpForm = () => {
       email: values.email,
       password: values.password,
       fetchOptions: {
-        onSuccess: () => {
-          router.push("/");
-        },
+        onSuccess: () => router.push("/"),
         onError: (error) => {
           if (error.error.code === "USER_ALREADY_EXISTS") {
             toast.error("Usuário já existe");
@@ -78,7 +69,6 @@ const SignUpForm = () => {
               message: "Email já cadastrado.",
             });
           }
-
           toast.error(
             "Erro ao criar conta. Tente novamente. " + error.error.message,
           );
@@ -88,60 +78,60 @@ const SignUpForm = () => {
   }
 
   return (
-    <>
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Criar Conta</CardTitle>
-          <CardDescription>
-            Crie uma conta para começar a usar nossos serviços.
-          </CardDescription>
-        </CardHeader>
+    <Card className="w-full rounded-2xl border-slate-200 shadow-sm">
+      <CardHeader>
+        <CardTitle>Criar Conta</CardTitle>
+        <CardDescription>
+          Crie uma conta para começar a usar nossos serviços.
+        </CardDescription>
+      </CardHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <CardContent className="grid gap-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Digite seu nome"
-                        type="text"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <CardContent className="grid gap-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Digite seu nome"
+                      type="text"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="email@example.com"
-                        type="email"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="email@example.com"
+                      type="email"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
+            <div className="grid gap-6 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>Senha</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Digite sua senha"
@@ -171,14 +161,18 @@ const SignUpForm = () => {
                   </FormItem>
                 )}
               />
-            </CardContent>
-            <CardFooter>
-              <Button type="submit">Criar conta</Button>
-            </CardFooter>
-          </form>
-        </Form>
-      </Card>
-    </>
+            </div>
+          </CardContent>
+
+          <CardFooter>
+            <Button type="submit" className="w-full rounded-full">
+              Criar conta
+            </Button>
+          </CardFooter>
+        </form>
+      </Form>
+    </Card>
   );
 };
+
 export default SignUpForm;
