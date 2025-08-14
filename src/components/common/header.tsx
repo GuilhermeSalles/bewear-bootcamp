@@ -39,11 +39,11 @@ import SearchCommand from "./search-command";
 
 const NAV = [
   { href: "/category/camisetas", label: "Camisetas" },
-  { href: "/category/bermudas-shorts", label: "Bermuda & Shorts" },
-  { href: "/category/calcas", label: "Calças" },
+  { href: "/category/bermuda-shorts", label: "Bermuda & Shorts" },
+  { href: "/category/calas", label: "Calças" },
   { href: "/category/jaquetas-moletons", label: "Jaquetas & Moletons" },
-  { href: "/category/tenis", label: "Tênis" },
-  { href: "/category/acessorios", label: "Acessórios" },
+  { href: "/category/tnis", label: "Tênis" },
+  { href: "/category/acessrios", label: "Acessórios" },
 ];
 
 export const Header = () => {
@@ -248,14 +248,14 @@ export const Header = () => {
             </Button>
 
             {/* atalho perfil (mantido) */}
-            <Button
+            {/* <Button
               variant="ghost"
               size="icon"
               className="hidden rounded-2xl md:inline-flex"
               aria-label="Perfil"
             >
               <User2 className="h-5 w-5" />
-            </Button>
+            </Button> */}
 
             <Cart />
           </div>
