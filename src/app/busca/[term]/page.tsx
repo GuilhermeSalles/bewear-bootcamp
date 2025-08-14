@@ -1,3 +1,4 @@
+// src/app/busca/[term]/page.tsx
 import { sql } from "drizzle-orm";
 import { notFound } from "next/navigation";
 
@@ -10,9 +11,10 @@ import { productTable } from "@/db/schema";
 export default async function SearchPage({
   params,
 }: {
-  params: { term: string };
+  params: Promise<{ term: string }>;
 }) {
-  const term = decodeURIComponent(params.term ?? "").trim();
+  const { term: raw } = await params;
+  const term = decodeURIComponent(raw ?? "").trim();
   if (!term) notFound();
 
   const pattern = `%${term}%`;
@@ -32,12 +34,10 @@ export default async function SearchPage({
           </h1>
           <p className="text-sm text-slate-500">
             {products.length} {products.length === 1 ? "item" : "itens"}{" "}
-            encontrado
-            {products.length === 1 ? "" : "s"}.
+            encontrado{products.length === 1 ? "" : "s"}.
           </p>
         </div>
 
-        {/* grade semelhante à listagem de categoria */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
           {products.map((product) => (
             <ProductItem key={product.id} product={product} />
