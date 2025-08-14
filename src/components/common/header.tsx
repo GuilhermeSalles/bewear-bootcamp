@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
@@ -50,6 +50,7 @@ export const Header = () => {
   const { data: session } = authClient.useSession();
   const [openSearch, setOpenSearch] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   const goToSearch = (term: string) => {
     const q = term.trim();
@@ -57,6 +58,9 @@ export const Header = () => {
     setOpenSearch(false);
     router.push(`/busca/${encodeURIComponent(q)}`);
   };
+
+  // helper para saber se a rota atual pertence ao link (ex.: /category/calcas/...)
+  const isActive = (href: string) => pathname?.startsWith(href);
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md">
@@ -138,13 +142,17 @@ export const Header = () => {
                   <nav className="space-y-1">
                     <Link
                       href="/"
-                      className="flex items-center gap-3 rounded-xl p-3 hover:bg-slate-50"
+                      className={`flex items-center gap-3 rounded-xl p-3 hover:bg-slate-50 ${
+                        isActive("/") && pathname === "/" ? "text-primary" : ""
+                      }`}
                     >
                       <Home className="h-4 w-4" /> Início
                     </Link>
                     <Link
-                      href="/orders"
-                      className="flex items-center gap-3 rounded-xl p-3 hover:bg-slate-50"
+                      href="/my-orders"
+                      className={`flex items-center gap-3 rounded-xl p-3 hover:bg-slate-50 ${
+                        isActive("/my-orders") ? "text-primary" : ""
+                      }`}
                     >
                       <Package className="h-4 w-4" /> Meus Pedidos
                     </Link>
@@ -154,7 +162,9 @@ export const Header = () => {
                       <Link
                         key={item.href}
                         href={item.href}
-                        className="block rounded-xl p-3 hover:bg-slate-50"
+                        className={`block rounded-xl p-3 hover:bg-slate-50 ${
+                          isActive(item.href) ? "text-primary" : ""
+                        }`}
                       >
                         {item.label}
                       </Link>
@@ -247,31 +257,34 @@ export const Header = () => {
               <Search className="h-5 w-5" />
             </Button>
 
-            {/* atalho perfil (mantido) */}
-            {/* <Button
-              variant="ghost"
-              size="icon"
-              className="hidden rounded-2xl md:inline-flex"
-              aria-label="Perfil"
-            >
-              <User2 className="h-5 w-5" />
-            </Button> */}
-
             <Cart />
           </div>
         </div>
 
         {/* nav desktop */}
         <nav className="hidden items-center justify-center gap-6 pb-3 text-sm text-slate-700 md:flex">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-full px-2 py-1 hover:text-black"
-            >
-              {item.label}
-            </Link>
-          ))}
+          {NAV.map((item) => {
+            const active = isActive(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`rounded-full px-2 py-1 hover:text-black ${
+                  active ? "text-primary" : ""
+                }`}
+              >
+                <span
+                  className={`inline-block pb-1 ${
+                    active
+                      ? "border-primary border-b-2"
+                      : "border-b-2 border-transparent"
+                  }`}
+                >
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
         </nav>
       </div>
       <Separator />
