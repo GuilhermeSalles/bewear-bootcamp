@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 
@@ -33,6 +35,7 @@ import {
   SheetTrigger,
 } from "../ui/sheet";
 import { Cart } from "./cart";
+import SearchCommand from "./search-command";
 
 const NAV = [
   { href: "/category/camisetas", label: "Camisetas" },
@@ -45,6 +48,15 @@ const NAV = [
 
 export const Header = () => {
   const { data: session } = authClient.useSession();
+  const [openSearch, setOpenSearch] = useState(false);
+  const router = useRouter();
+
+  const goToSearch = (term: string) => {
+    const q = term.trim();
+    if (!q) return;
+    setOpenSearch(false);
+    router.push(`/busca/${encodeURIComponent(q)}`);
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md">
@@ -59,6 +71,7 @@ export const Header = () => {
                   variant="outline"
                   size="icon"
                   className="rounded-2xl md:hidden"
+                  aria-label="Abrir menu"
                 >
                   <MenuIcon />
                 </Button>
@@ -104,6 +117,7 @@ export const Header = () => {
                         variant="outline"
                         size="icon"
                         onClick={() => authClient.signOut()}
+                        aria-label="Sair"
                       >
                         <LogOutIcon />
                       </Button>
@@ -129,7 +143,7 @@ export const Header = () => {
                       <Home className="h-4 w-4" /> Início
                     </Link>
                     <Link
-                      href="/my-orders"
+                      href="/orders"
                       className="flex items-center gap-3 rounded-xl p-3 hover:bg-slate-50"
                     >
                       <Package className="h-4 w-4" /> Meus Pedidos
@@ -150,11 +164,12 @@ export const Header = () => {
               </SheetContent>
             </Sheet>
 
-            {/* desktop: nome clicável com dropdown */}
+            {/* desktop: nome clicável com ícone de user e dropdown */}
             <div className="hidden md:block">
               {session?.user ? (
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="text-sm text-slate-700 hover:text-black">
+                  <DropdownMenuTrigger className="flex items-center gap-2 text-sm text-slate-700 hover:text-black">
+                    <User2 className="h-4 w-4" />
                     Olá,{" "}
                     <span className="font-semibold">
                       {session.user.name?.split(" ")?.[0]}
@@ -179,7 +194,6 @@ export const Header = () => {
                     <DropdownMenuItem asChild>
                       <Link href="/orders">Meus pedidos</Link>
                     </DropdownMenuItem>
-
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => authClient.signOut()}
@@ -191,7 +205,8 @@ export const Header = () => {
                 </DropdownMenu>
               ) : (
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="text-sm text-slate-700 hover:text-black">
+                  <DropdownMenuTrigger className="flex items-center gap-2 text-sm text-slate-700 hover:text-black">
+                    <User2 className="h-4 w-4" />
                     Olá, visitante
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="w-56">
@@ -221,20 +236,27 @@ export const Header = () => {
 
           {/* direita: ações */}
           <div className="flex items-center justify-end gap-2">
+            {/* Lupa abre a busca (mobile + desktop) */}
             <Button
               variant="ghost"
               size="icon"
-              className="hidden rounded-2xl md:inline-flex"
+              className="rounded-2xl"
+              aria-label="Buscar"
+              onClick={() => setOpenSearch(true)}
             >
               <Search className="h-5 w-5" />
             </Button>
+
+            {/* atalho perfil (mantido) */}
             <Button
               variant="ghost"
               size="icon"
               className="hidden rounded-2xl md:inline-flex"
+              aria-label="Perfil"
             >
               <User2 className="h-5 w-5" />
             </Button>
+
             <Cart />
           </div>
         </div>
@@ -253,6 +275,13 @@ export const Header = () => {
         </nav>
       </div>
       <Separator />
+
+      {/* Dialog de Busca */}
+      <SearchCommand
+        open={openSearch}
+        onOpenChange={setOpenSearch}
+        onSubmit={goToSearch}
+      />
     </header>
   );
 };
