@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { addProductToCart } from "@/actions/add-cart-product";
 import { Button } from "@/components/ui/button";
@@ -19,9 +20,9 @@ const AddToCartButton = ({
   quantity,
   onSuccess,
 }: AddToCartButtonProps) => {
-  const queryClient = useQueryClient();
   const router = useRouter();
   const { data: session } = authClient.useSession();
+  const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
     mutationKey: ["addProductToCart", productVariantId, quantity],
@@ -33,22 +34,29 @@ const AddToCartButton = ({
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["cart"] });
       onSuccess?.();
+      toast.success("Produto adicionado à sacola!");
+    },
+    onError: () => {
+      toast.error("Não foi possível adicionar à sacola. Tente novamente.");
     },
   });
 
   const handleClick = () => {
-    // Se não autenticado → manda para /authentication com redirect de volta
     if (!session?.user?.id) {
-      const back =
-        typeof window !== "undefined" ? window.location.pathname : "/";
-      router.push(`/authentication?redirect=${encodeURIComponent(back)}`);
+      toast.info("Faça login para adicionar itens à sacola.");
+      router.push("/authentication");
       return;
     }
     mutate();
   };
 
   return (
-    <Button className="rounded-full" disabled={isPending} onClick={handleClick}>
+    <Button
+      className="rounded-full"
+      variant="outline"
+      disabled={isPending}
+      onClick={handleClick}
+    >
       {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
       Adicionar à sacola
     </Button>

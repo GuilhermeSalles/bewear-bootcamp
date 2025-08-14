@@ -207,7 +207,7 @@ export const Header = () => {
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center gap-2 text-sm text-slate-700 hover:text-black">
                     <User2 className="h-4 w-4" />
-                    Olá, visitante
+                    Fazer login
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="w-56">
                     <DropdownMenuItem asChild>
