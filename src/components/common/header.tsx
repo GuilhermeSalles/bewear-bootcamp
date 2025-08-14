@@ -192,7 +192,7 @@ export const Header = () => {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/orders">Meus pedidos</Link>
+                      <Link href="/my-orders">Meus pedidos</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
