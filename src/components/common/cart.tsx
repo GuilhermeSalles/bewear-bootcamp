@@ -57,7 +57,7 @@ export const Cart = () => {
         >
           <ShoppingBasketIcon />
           {totalCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white">
+            <span className="bg-primary absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-semibold text-white">
               {totalCount > 9 ? "9+" : totalCount}
             </span>
           )}
